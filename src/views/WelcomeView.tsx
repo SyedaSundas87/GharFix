@@ -13,7 +13,7 @@ const welcomeSlides: WelcomeSlide[] = [
     id: 1,
     title: 'Find trusted experts near you',
     description: 'Access a network of verified professionals for all your home maintenance needs.',
-    image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=2069&auto=format&fit=crop',
+    image: '/cleaner.jpeg',
   },
   {
     id: 2,
