@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { Star, MapPin, CheckCircle2, Clock, Info, ArrowRight, ShieldCheck, TrendingUp, Zap, Hash, BadgeCheck, Award } from 'lucide-react';
+import { Star, MapPin, CheckCircle2, Clock, Info, ArrowRight, ShieldCheck, TrendingUp, Sparkles, Hash, BadgeCheck, Award } from 'lucide-react';
 import { useState } from 'react';
 import { transformMatchData, MatchViewData, ProviderCardData } from '../lib/transformer';
 import { BookingPayload } from './BookingView';
@@ -276,8 +276,9 @@ export function MatchView({ data, onBook, appLanguage, onSearchAgain }: MatchVie
     english: {
       finding: "Finding Your Best Match",
       scanning: "We're scanning 20+ verified providers in your area...",
-      noMatches: "No Matches Found",
+      noMatches: "No Providers Available",
       noMatchesText: "We couldn't find available providers for your request right now.",
+      nearbyAreas: "Try searching in nearby areas:",
       tryAgain: "Try Again",
       found: "Found", estimate: "Estimated Cost", total: "approx. total",
       disclaimer: "Final price may vary slightly based on actual work required.",
@@ -289,8 +290,9 @@ export function MatchView({ data, onBook, appLanguage, onSearchAgain }: MatchVie
     urdu: {
       finding: "ہم آپ کے لیے بہترین میاچ تلاش کر رہے ہیں",
       scanning: "ہم آپ کے علاقے میں 20 سے زیادہ تصدیق شدہ فراہم کنندگان کی جانچ کر رہے ہیں...",
-      noMatches: "کوئی میاچ نہیں ملا",
+      noMatches: "کوئی فراہم کنندہ دستیاب نہیں",
       noMatchesText: "ہمیں ابھی آپ کی درخواست کے لیے کوئی دستیاب فراہم کنندہ نہیں ملا۔",
+      nearbyAreas: "قریبی علاقوں میں تلاش کریں:",
       tryAgain: "دوبارہ کوشش کریں",
       found: "مل گئے", estimate: "متوقع قیمت", total: "تقریباً",
       disclaimer: "کام کی نوعیت کے مطابق حتمی قیمت تھوڑی تبدیل ہو سکتی ہے۔",
@@ -302,8 +304,9 @@ export function MatchView({ data, onBook, appLanguage, onSearchAgain }: MatchVie
     roman_urdu: {
       finding: "Finding Your Best Match",
       scanning: "We're scanning 20+ verified providers in your area...",
-      noMatches: "No Matches Found",
+      noMatches: "No Providers Available",
       noMatchesText: "We couldn't find available providers for your request right now.",
+      nearbyAreas: "Try searching in nearby areas:",
       tryAgain: "Try Again",
       found: "Found", estimate: "Estimated Cost", total: "approx. total",
       disclaimer: "Final price may vary slightly based on actual work required.",
@@ -379,7 +382,7 @@ export function MatchView({ data, onBook, appLanguage, onSearchAgain }: MatchVie
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 px-4">
         <div className="relative">
           <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
-          <Zap className="w-6 h-6 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+          <Sparkles className="w-6 h-6 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
         </div>
         <div className="space-y-2">
           <p className="text-sm font-medium text-on-surface-variant">{t.finding}</p>
@@ -389,15 +392,45 @@ export function MatchView({ data, onBook, appLanguage, onSearchAgain }: MatchVie
     );
   }
 
-  if (uiData.status === 'error' || (!uiData.top_provider_card && uiData.alternative_cards.length === 0)) {
+  if (uiData.status === 'error' || uiData.status === 'no_matches' || (!uiData.top_provider_card && uiData.alternative_cards.length === 0)) {
+    const hasNearbyAreas = uiData.nearby_areas && uiData.nearby_areas.length > 0;
+    
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 px-4">
-        <Info className="w-12 h-12 text-outline" />
-        <div className="space-y-2">
-          <p className="text-sm font-medium text-on-surface-variant">{t.noMatches}</p>
-          <p className="text-xs text-outline">{t.noMatchesText}</p>
+        <div className="relative">
+          <div className="w-16 h-16 rounded-full bg-surface-container-low flex items-center justify-center">
+            <Info className="w-8 h-8 text-outline" />
+          </div>
         </div>
-        <button onClick={onSearchAgain} className="px-6 py-3 bg-primary text-white rounded-2xl font-bold text-sm shadow-md active:scale-95 transition-all">
+        <div className="space-y-2 max-w-sm">
+          <p className="text-sm font-bold text-on-surface">{t.noMatches}</p>
+          <p className="text-xs text-outline">{uiData.no_match_reason || t.noMatchesText}</p>
+        </div>
+
+        {/* Nearby Areas Suggestions */}
+        {hasNearbyAreas && (
+          <div className="w-full max-w-sm bg-surface-container-low rounded-2xl p-4 border border-outline-variant/20">
+            <p className="text-xs font-bold text-outline uppercase tracking-wider mb-3">{t.nearbyAreas}</p>
+            <div className="space-y-2">
+              {uiData.nearby_areas!.map((area, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    // Store the selected area and trigger search again
+                    // This will be handled by the parent component
+                    onSearchAgain();
+                  }}
+                  className="w-full px-4 py-2.5 bg-white border border-primary/20 text-primary rounded-xl font-semibold text-sm hover:bg-primary/5 hover:border-primary/40 active:scale-95 transition-all flex items-center justify-between group"
+                >
+                  <span>{area}</span>
+                  <span className="text-xs opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <button onClick={onSearchAgain} className="px-6 py-3 bg-primary text-white rounded-2xl font-bold text-sm shadow-md shadow-primary/20 active:scale-95 transition-all hover:shadow-lg">
           {t.tryAgain}
         </button>
       </div>

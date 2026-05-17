@@ -116,14 +116,16 @@ export function ProviderLoginView({ onLoginSuccess }: ProviderLoginViewProps) {
                     {showDropdown && (
                       <>
                         <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
-                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-outline-variant/30 rounded-xl shadow-xl z-50 overflow-hidden">
-                          {knownProviders.map(p => (
-                            <button key={p.id} type="button" onClick={() => { setProviderIdInput(p.id); setShowDropdown(false); }}
-                              className={`w-full flex flex-col items-start px-4 py-3 hover:bg-primary/5 transition-colors border-b border-outline-variant/10 last:border-0 text-left ${providerIdInput === p.id ? 'bg-primary/5' : ''}`}>
-                              <span className="text-sm font-bold text-on-surface">{p.name}</span>
-                              <span className="text-[10px] font-mono text-outline truncate w-full mt-0.5">{p.id}</span>
-                            </button>
-                          ))}
+                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-outline-variant/30 rounded-xl shadow-xl z-50 overflow-hidden max-h-64 flex flex-col">
+                          <div className="overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-primary/30 scrollbar-track-surface-container-low">
+                            {knownProviders.map(p => (
+                              <button key={p.id} type="button" onClick={() => { setProviderIdInput(p.id); setShowDropdown(false); }}
+                                className={`w-full flex flex-col items-start px-4 py-3 hover:bg-primary/5 transition-colors border-b border-outline-variant/10 last:border-0 text-left ${providerIdInput === p.id ? 'bg-primary/5' : ''}`}>
+                                <span className="text-sm font-bold text-on-surface">{p.name}</span>
+                                <span className="text-[10px] font-mono text-outline truncate w-full mt-0.5">{p.id}</span>
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       </>
                     )}

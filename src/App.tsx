@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Home as HomeIcon, Search, Calendar, MessageSquare, User, Zap, Menu, Bell, Shield, Languages, ChevronDown, ArrowLeft } from 'lucide-react';
+import { Home as HomeIcon, Search, Calendar, MessageSquare, User, LayoutDashboard, Menu, Bell, Shield, Languages, ChevronDown, ArrowLeft } from 'lucide-react';
 import { HomeView } from './views/HomeView';
-import { ChatView } from './views/ChatView';
 import { MatchView } from './views/MatchView';
 import { DashView } from './views/DashView';
 import { OnboardingView } from './views/OnboardingView';
+import { WelcomeView } from './views/WelcomeView';
 import { BookingView } from './views/BookingView';
 import { BookingsListView } from './views/BookingsListView';
 import { ServiceQualityView } from './views/ServiceQualityView';
@@ -13,16 +13,14 @@ import { ProviderDashView } from './views/ProviderDashView';
 import { getUserProfile, hasUserProfile, clearUserProfile } from './lib/profile';
 import type { BookingPayload } from './views/BookingView';
 
-export type ViewState = 'login' | 'onboarding' | 'home' | 'search' | 'booking' | 'bookings' | 'chat' | 'profile' | 'tracking' | 'provider_dash';
+export type ViewState = 'welcome' | 'login' | 'onboarding' | 'home' | 'search' | 'booking' | 'bookings' | 'profile' | 'tracking' | 'provider_dash';
 export type AppLanguage = 'english' | 'urdu' | 'roman_urdu';
 
 // Navigation history stack for proper back navigation
 type NavEntry = { view: ViewState; label: string };
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<ViewState>(() => {
-    return hasUserProfile() ? 'home' : 'login';
-  });
+  const [currentView, setCurrentView] = useState<ViewState>('welcome');
   const [navHistory, setNavHistory] = useState<NavEntry[]>([]);
   const [matchData, setMatchData] = useState<any>(null);
   const [bookingPayload, setBookingPayload] = useState<BookingPayload | null>(null);
@@ -39,7 +37,7 @@ export default function App() {
   // Navigate with history tracking
   const navigateTo = (view: ViewState, label?: string) => {
     // Bottom-nav tabs reset history; deep views push onto stack
-    const isTabView = ['home', 'search', 'bookings', 'chat', 'profile', 'provider_dash'].includes(view);
+    const isTabView = ['home', 'search', 'bookings', 'profile', 'provider_dash'].includes(view);
     if (isTabView) {
       setNavHistory([]);
     } else {
@@ -60,6 +58,14 @@ export default function App() {
 
   useEffect(() => {
     localStorage.setItem('app_language', appLanguage);
+    // Update document direction and language based on app language
+    if (appLanguage === 'urdu') {
+      document.documentElement.dir = 'rtl';
+      document.documentElement.lang = 'ur';
+    } else {
+      document.documentElement.dir = 'ltr';
+      document.documentElement.lang = 'en';
+    }
     if (isProvider && currentView === 'home') {
       setCurrentView('provider_dash');
     }
@@ -81,6 +87,22 @@ export default function App() {
     setMatchData(null);
     setBookingPayload(null);
     setTrackingPayload(null);
+  };
+
+  const handleWelcomeGetStarted = () => {
+    if (hasUserProfile()) {
+      setCurrentView('home');
+    } else {
+      setCurrentView('login');
+    }
+  };
+
+  const handleWelcomeSkip = () => {
+    if (hasUserProfile()) {
+      setCurrentView('home');
+    } else {
+      setCurrentView('login');
+    }
   };
 
   const handleServiceTriggered = (data: any) => {
@@ -110,13 +132,13 @@ export default function App() {
 
   // View title map
   const viewTitles: Record<ViewState, string> = {
+    welcome: 'KhidmatGaar',
     login: 'KhidmatGaar',
     onboarding: 'KhidmatGaar',
     home: userProfile?.name ? `Asalam-o-Alaikum, ${userProfile.name.split(' ')[0]}` : 'Asalam-o-Alaikum',
     search: 'Provider Matches',
     booking: 'Confirm Booking',
     bookings: 'My Bookings',
-    chat: 'AI Assistant',
     profile: 'My Profile',
     tracking: 'Live Tracking',
     provider_dash: 'Dashboard',
@@ -129,10 +151,10 @@ export default function App() {
   };
 
   const TopBar = () => (
-    <div className="w-full flex justify-between items-center h-full">
+    <div className="w-full flex justify-between items-center h-full" dir={appLanguage === 'urdu' ? 'rtl' : 'ltr'}>
       {/* Left: back button or avatar */}
-      <div className="flex items-center gap-3">
-        {isDeepView || currentView === 'chat' ? (
+      <div className={`flex items-center gap-3 ${appLanguage === 'urdu' ? 'flex-row-reverse' : ''}`}>
+        {isDeepView ? (
           <button
             onClick={navigateBack}
             className="p-2 -ml-1 text-primary hover:bg-primary/10 rounded-xl transition-colors active:scale-95"
@@ -140,13 +162,18 @@ export default function App() {
           >
             <ArrowLeft className="w-5 h-5" strokeWidth={2.5} />
           </button>
-        ) : currentView !== 'onboarding' && currentView !== 'login' ? (
+        ) : currentView !== 'onboarding' && currentView !== 'login' && currentView !== 'welcome' ? (
           <div className="relative">
-            <img
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCA7VYFPz5C-EPxeIjxNlal5E1Vnwc-ki_yUj9x6NxZLlSIdZzFRyv0FVRltywHEcarX17_v7djTgIfU9Ku5iF4-LQVLiGwKyHDqkoVzdaKtbH98KG3EtA-LaU83jeZ5ClPf6Poj2kfGuz4bS6ruYRL0OfuIw7PHdRjbIfH5703TuGVZXW2n76eOjAvoLzjFccJ34VaCYawWXIqubLTnF6hLiv5TaCS7CjILJ8Y0dLsdvudb5zbLQNrACG-bXY-8HRgUYnp-CfGtR4"
-              alt="Profile"
-              className="w-10 h-10 rounded-full border-2 border-primary-container object-cover"
-            />
+            <div className="w-10 h-10 rounded-full border-2 border-primary-container bg-primary flex items-center justify-center">
+              <span className="text-sm font-bold text-on-primary">
+                {userProfile?.name
+                  ?.split(' ')
+                  .slice(0, 2)
+                  .map(n => n[0])
+                  .join('')
+                  .toUpperCase() || 'U'}
+              </span>
+            </div>
             <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-secondary rounded-full border-2 border-white flex items-center justify-center">
               <div className="w-1.5 h-1.5 bg-white rounded-full" />
             </div>
@@ -161,7 +188,7 @@ export default function App() {
         )}
 
         {/* Title block */}
-        {currentView !== 'onboarding' && currentView !== 'login' && (
+        {currentView !== 'onboarding' && currentView !== 'login' && currentView !== 'welcome' && (
           <div>
             <h1 className="text-base font-bold text-primary leading-tight">
               {viewTitles[currentView]}
@@ -171,20 +198,13 @@ export default function App() {
                 {viewSubtitles[currentView]}
               </p>
             )}
-            {currentView === 'chat' && (
-              <div className="flex gap-1 mt-0.5">
-                {[0, 200, 400].map(d => (
-                  <span key={d} className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" style={{ animationDelay: `${d}ms` }} />
-                ))}
-              </div>
-            )}
           </div>
         )}
       </div>
 
       {/* Right controls */}
-      <div className="flex items-center gap-2">
-        {currentView !== 'login' && (
+      <div className={`flex items-center gap-2 ${appLanguage === 'urdu' ? 'flex-row-reverse' : ''}`}>
+        {currentView !== 'login' && currentView !== 'welcome' && (
           <div className="relative">
             <button
               onClick={() => setShowLangMenu(v => !v)}
@@ -215,7 +235,7 @@ export default function App() {
           </div>
         )}
 
-        {(currentView === 'home' || currentView === 'bookings' || currentView === 'provider_dash') && (
+        {(currentView === 'home' || currentView === 'bookings' || currentView === 'provider_dash') && currentView !== 'welcome' && (
           <button className="relative p-2 text-on-surface-variant hover:bg-surface-variant rounded-full transition-colors">
             <Bell className="w-5 h-5" />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full border border-white" />
@@ -233,15 +253,13 @@ export default function App() {
 
   const BottomNav = () => {
     const navTabs = isProvider ? [
-      { id: 'provider_dash', icon: Zap, label: appLanguage === 'urdu' ? 'ڈیش بورڈ' : 'Dashboard' },
+      { id: 'provider_dash', icon: LayoutDashboard, label: appLanguage === 'urdu' ? 'ڈیش بورڈ' : 'Dashboard' },
       { id: 'bookings', icon: Calendar, label: appLanguage === 'urdu' ? 'بکنگز' : 'Bookings' },
-      { id: 'chat', icon: MessageSquare, label: appLanguage === 'urdu' ? 'چیٹ' : 'Chat' },
       { id: 'profile', icon: User, label: appLanguage === 'urdu' ? 'پروفائل' : 'Profile' },
     ] : [
       { id: 'home', icon: HomeIcon, label: appLanguage === 'urdu' ? 'ہوم' : 'Home' },
       { id: 'search', icon: Search, label: appLanguage === 'urdu' ? 'تلاش' : 'Match' },
       { id: 'bookings', icon: Calendar, label: appLanguage === 'urdu' ? 'بکنگز' : 'Bookings' },
-      { id: 'chat', icon: MessageSquare, label: appLanguage === 'urdu' ? 'چیٹ' : 'Chat' },
       { id: 'profile', icon: User, label: appLanguage === 'urdu' ? 'پروفائل' : 'Profile' },
     ];
 
@@ -251,7 +269,7 @@ export default function App() {
       : currentView;
 
     return (
-      <nav className="w-full flex justify-around items-center px-2 py-3 pb-safe glass-surface rounded-t-2xl">
+      <nav className={`w-full flex justify-around items-center px-2 py-3 pb-safe glass-surface rounded-t-2xl ${appLanguage === 'urdu' ? 'flex-row-reverse' : ''}`}>
         {navTabs.map(tab => {
           const isActive = activeTab === tab.id;
           const Icon = tab.icon;
@@ -281,28 +299,28 @@ export default function App() {
     );
   };
 
-  const showBottomNav = !['onboarding', 'booking', 'tracking', 'login'].includes(currentView);
-  const showFAB = !['home', 'chat', 'onboarding', 'booking', 'tracking', 'login'].includes(currentView);
+  const showBottomNav = !['onboarding', 'booking', 'tracking', 'login', 'welcome'].includes(currentView);
+  
+  // RTL support: apply direction to main container
+  const mainDir = appLanguage === 'urdu' ? 'rtl' : 'ltr';
 
   return (
     <div
       className="min-h-screen bg-background relative selection:bg-primary-container selection:text-on-primary-container max-w-3xl mx-auto lg:max-w-5xl md:shadow-2xl md:border-x border-outline-variant/20 overflow-x-hidden"
       onClick={() => showLangMenu && setShowLangMenu(false)}
+      dir={mainDir}
     >
       <header className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl lg:max-w-5xl z-50 flex justify-between items-center px-4 h-16 glass-surface shadow-sm">
         <TopBar />
       </header>
 
-      <main className={`w-full h-full min-h-screen overflow-y-auto ${currentView === 'onboarding' || currentView === 'login' ? '' : 'pt-20 pb-28 md:pb-24'} px-4`}>
+      <main className={`w-full h-full min-h-screen overflow-y-auto ${currentView === 'onboarding' || currentView === 'login' || currentView === 'welcome' ? '' : 'pt-20 pb-28 md:pb-24'} px-4`}>
+        {currentView === 'welcome' && <WelcomeView onGetStarted={handleWelcomeGetStarted} />}
         {currentView === 'login' && <ProviderLoginView onLoginSuccess={handleLoginSuccess} />}
         {currentView === 'onboarding' && <OnboardingView onComplete={handleLoginSuccess} />}
 
         {currentView === 'home' && (
           <HomeView appLanguage={appLanguage} onServiceTriggered={handleServiceTriggered} />
-        )}
-
-        {currentView === 'chat' && (
-          <ChatView appLanguage={appLanguage} onServiceTriggered={handleServiceTriggered} />
         )}
 
         {currentView === 'search' && (
@@ -328,27 +346,30 @@ export default function App() {
             key={trackingPayload.booking_id}
             payload={trackingPayload}
             appLanguage={appLanguage}
-            initialStage="en_route"
-            onComplete={() => navigateTo(isProvider ? 'provider_dash' : 'bookings')}
           />
         )}
 
-        {currentView === 'bookings' && <BookingsListView appLanguage={appLanguage} onTrack={handleTrack} />}
-        {currentView === 'profile' && <DashView appLanguage={appLanguage} onLogout={handleLogout} />}
-        {currentView === 'provider_dash' && isProvider && userProfile?.provider_id && (
-          <ProviderDashView appLanguage={appLanguage} providerId={userProfile.provider_id} />
+        {currentView === 'bookings' && (
+          <BookingsListView
+            appLanguage={appLanguage}
+            onTrack={handleTrack}
+          />
+        )}
+
+        {currentView === 'profile' && (
+          <DashView
+            appLanguage={appLanguage}
+            onLogout={handleLogout}
+          />
+        )}
+
+        {currentView === 'provider_dash' && userProfile?.provider_id && (
+          <ProviderDashView
+            appLanguage={appLanguage}
+            providerId={userProfile.provider_id}
+          />
         )}
       </main>
-
-      {showFAB && (
-        <button
-          onClick={() => navigateTo('chat')}
-          className="fixed bottom-24 right-5 lg:right-[calc(50%-max(512px,50%)/2+1.25rem)] z-40 ai-gradient-border w-14 h-14 rounded-full shadow-xl bg-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all group"
-        >
-          <Zap className="w-6 h-6 text-primary group-hover:scale-110 transition-transform fill-current" />
-          <div className="absolute -top-1 -right-1 w-4 h-4 bg-secondary border-2 border-white rounded-full animate-pulse" />
-        </button>
-      )}
 
       {showBottomNav && (
         <footer className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-3xl lg:max-w-5xl z-50">

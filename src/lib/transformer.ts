@@ -18,7 +18,7 @@ export interface ProviderLocation {
 }
 
 export interface ProviderCardData {
-  id?: string;
+  id: string;
   type: 'top_match' | 'alternative';
   name: string;
   rating: number;
@@ -49,6 +49,106 @@ export interface MatchViewData {
   pricing_card: PricingCardData;
   top_provider_card: ProviderCardData | null;
   alternative_cards: ProviderCardData[];
+  nearby_areas?: string[]; // Nearby area suggestions for no-match fallback
+  no_match_reason?: string; // Reason why no providers found
+}
+
+// ── NEARBY AREAS DATABASE ──
+// Maps each area to nearby alternatives (for graceful no-match fallback)
+const nearbyAreaMap: Record<string, string[]> = {
+  // Lahore
+  'Johar Town': ['Model Town', 'DHA Lahore', 'Bahria Town Lahore', 'Iqbal Town'],
+  'Model Town': ['Johar Town', 'DHA Lahore', 'Gulshan-e-Ravi', 'Iqbal Town'],
+  'DHA Lahore': ['Johar Town', 'Model Town', 'Bahria Town Lahore', 'Cantt Lahore'],
+  'Bahria Town Lahore': ['DHA Lahore', 'Johar Town', 'Model Town', 'Faisal Town'],
+  'Gulshan-e-Ravi': ['Model Town', 'Johar Town', 'Iqbal Town', 'Allama Iqbal Town'],
+  'Iqbal Town': ['Johar Town', 'Gulshan-e-Ravi', 'Allama Iqbal Town', 'Model Town'],
+  'Faisal Town': ['Bahria Town Lahore', 'Wapda Town', 'Johar Town', 'Township'],
+  'Wapda Town': ['Faisal Town', 'Township', 'Johar Town', 'Iqbal Town'],
+  'Township': ['Wapda Town', 'Faisal Town', 'Johar Town', 'Cantt Lahore'],
+  'Cantt Lahore': ['DHA Lahore', 'Township', 'Askari Lahore', 'Mall Road Lahore'],
+  'Allama Iqbal Town': ['Iqbal Town', 'Gulshan-e-Ravi', 'Johar Town', 'Thokar Niaz Baig'],
+  'Askari Lahore': ['Cantt Lahore', 'DHA Lahore', 'Mall Road Lahore', 'Anarkali'],
+  'Thokar Niaz Baig': ['Allama Iqbal Town', 'Iqbal Town', 'Gulshan-e-Ravi', 'Johar Town'],
+  'Mall Road Lahore': ['Askari Lahore', 'Cantt Lahore', 'Saddar Lahore', 'Anarkali'],
+  'Anarkali': ['Mall Road Lahore', 'Saddar Lahore', 'Askari Lahore', 'Cantt Lahore'],
+  'Saddar Lahore': ['Anarkali', 'Mall Road Lahore', 'Cantt Lahore', 'Askari Lahore'],
+
+  // Karachi
+  'Clifton': ['DHA Karachi', 'Bahria Town Karachi', 'PECHS', 'Gulshan-e-Iqbal'],
+  'DHA Karachi': ['Clifton', 'Bahria Town Karachi', 'PECHS', 'Gulshan-e-Iqbal'],
+  'Bahria Town Karachi': ['DHA Karachi', 'Clifton', 'PECHS', 'Gulshan-e-Iqbal'],
+  'PECHS': ['DHA Karachi', 'Clifton', 'Gulshan-e-Iqbal', 'North Nazimabad'],
+  'Gulshan-e-Iqbal': ['PECHS', 'DHA Karachi', 'North Nazimabad', 'Nazimabad'],
+  'North Nazimabad': ['Gulshan-e-Iqbal', 'Nazimabad', 'PECHS', 'Korangi'],
+  'Nazimabad': ['North Nazimabad', 'Gulshan-e-Iqbal', 'Liaquatabad', 'Korangi'],
+  'Korangi': ['Landhi', 'Malir', 'North Nazimabad', 'Nazimabad'],
+  'Landhi': ['Korangi', 'Malir', 'Badin', 'Thatta'],
+  'Malir': ['Landhi', 'Korangi', 'Saddar Karachi', 'Orangi Town'],
+  'Saddar Karachi': ['Malir', 'Orangi Town', 'Liaquatabad', 'Federal B Area'],
+  'Orangi Town': ['Saddar Karachi', 'Liaquatabad', 'Surjani Town', 'Federal B Area'],
+  'Liaquatabad': ['Orangi Town', 'Nazimabad', 'Federal B Area', 'Surjani Town'],
+  'Federal B Area': ['Liaquatabad', 'Orangi Town', 'Surjani Town', 'Scheme 33'],
+  'Surjani Town': ['Federal B Area', 'Liaquatabad', 'Scheme 33', 'Orangi Town'],
+  'Scheme 33': ['Surjani Town', 'Federal B Area', 'Gulistan-e-Jauhar', 'Gulshan-e-Iqbal'],
+  'Gulistan-e-Jauhar': ['Scheme 33', 'Gulshan-e-Iqbal', 'PECHS', 'DHA Karachi'],
+
+  // Islamabad
+  'F-6': ['F-7', 'F-8', 'F-10', 'Blue Area'],
+  'F-7': ['F-6', 'F-8', 'F-10', 'F-11'],
+  'F-8': ['F-7', 'F-6', 'F-10', 'F-11'],
+  'F-10': ['F-6', 'F-7', 'F-8', 'F-11'],
+  'F-11': ['F-10', 'F-8', 'G-11', 'Blue Area'],
+  'G-9': ['G-10', 'G-11', 'G-13', 'E-7'],
+  'G-10': ['G-9', 'G-11', 'G-13', 'G-14'],
+  'G-11': ['G-10', 'G-9', 'G-13', 'F-11'],
+  'G-13': ['G-11', 'G-10', 'G-14', 'G-9'],
+  'G-14': ['G-13', 'G-11', 'G-10', 'I-8'],
+  'E-7': ['G-9', 'I-8', 'I-10', 'Blue Area'],
+  'I-8': ['E-7', 'I-10', 'G-14', 'G-13'],
+  'I-10': ['I-8', 'E-7', 'Blue Area', 'Bahria Town Islamabad'],
+  'Blue Area': ['F-6', 'F-11', 'E-7', 'I-10'],
+  'Bahria Town Islamabad': ['DHA Islamabad', 'I-10', 'Bani Gala', 'Soan Garden'],
+  'DHA Islamabad': ['Bahria Town Islamabad', 'Bani Gala', 'PWD', 'Soan Garden'],
+  'Bani Gala': ['DHA Islamabad', 'Bahria Town Islamabad', 'PWD', 'Soan Garden'],
+  'PWD': ['DHA Islamabad', 'Bani Gala', 'Soan Garden', 'Bahria Town Islamabad'],
+  'Soan Garden': ['PWD', 'DHA Islamabad', 'Bani Gala', 'Bahria Town Islamabad'],
+
+  // Rawalpindi
+  'Saddar Rawalpindi': ['Cantt Rawalpindi', 'Bahria Town Rawalpindi', 'DHA Rawalpindi', 'Satellite Town'],
+  'Cantt Rawalpindi': ['Saddar Rawalpindi', 'DHA Rawalpindi', 'Bahria Town Rawalpindi', 'Satellite Town'],
+  'Bahria Town Rawalpindi': ['DHA Rawalpindi', 'Cantt Rawalpindi', 'Saddar Rawalpindi', 'Satellite Town'],
+  'DHA Rawalpindi': ['Bahria Town Rawalpindi', 'Cantt Rawalpindi', 'Saddar Rawalpindi', 'Chakri Road'],
+  'Satellite Town': ['Saddar Rawalpindi', 'Cantt Rawalpindi', 'Chakri Road', 'Adiala Road'],
+  'Chakri Road': ['DHA Rawalpindi', 'Satellite Town', 'Adiala Road', 'Cantt Rawalpindi'],
+  'Adiala Road': ['Chakri Road', 'Satellite Town', 'DHA Rawalpindi', 'Bahria Town Rawalpindi'],
+
+  // Faisalabad
+  'Peoples Colony': ['Ghulam Muhammad Abad', 'Jinnah Colony', 'Susan Road', 'Satiana Road'],
+  'Ghulam Muhammad Abad': ['Peoples Colony', 'Jinnah Colony', 'Susan Road', 'Satiana Road'],
+  'Jinnah Colony': ['Peoples Colony', 'Ghulam Muhammad Abad', 'Susan Road', 'Satiana Road'],
+  'Susan Road': ['Peoples Colony', 'Ghulam Muhammad Abad', 'Satiana Road', 'Jinnah Colony'],
+  'Satiana Road': ['Susan Road', 'Peoples Colony', 'Ghulam Muhammad Abad', 'Jinnah Colony'],
+
+  // Multan
+  'Cantt Multan': ['Shah Rukn-e-Alam', 'Gulgasht Colony', 'DHA Multan', 'Saddar Multan'],
+  'Shah Rukn-e-Alam': ['Cantt Multan', 'Gulgasht Colony', 'DHA Multan', 'Saddar Multan'],
+  'Gulgasht Colony': ['Shah Rukn-e-Alam', 'Cantt Multan', 'DHA Multan', 'Saddar Multan'],
+  'DHA Multan': ['Gulgasht Colony', 'Shah Rukn-e-Alam', 'Cantt Multan', 'Saddar Multan'],
+
+  // Peshawar
+  'Hayatabad': ['University Town', 'Cantt Peshawar', 'Saddar Peshawar', 'Nowshera'],
+  'University Town': ['Hayatabad', 'Cantt Peshawar', 'Saddar Peshawar', 'Mardan'],
+  'Cantt Peshawar': ['Saddar Peshawar', 'Hayatabad', 'University Town', 'Mardan'],
+  'Saddar Peshawar': ['Cantt Peshawar', 'Hayatabad', 'University Town', 'Mardan'],
+};
+
+/**
+ * Get nearby areas for fallback suggestions when no providers are found
+ */
+export function getNearbyAreas(area: string, count: number = 3): string[] {
+  const nearby = nearbyAreaMap[area] || [];
+  return nearby.slice(0, count);
 }
 
 export function transformMatchData(backendResponse: any): MatchViewData {
@@ -153,6 +253,7 @@ export function transformMatchData(backendResponse: any): MatchViewData {
   };
 
   const mapProvider = (p: any, type: 'top_match' | 'alternative'): ProviderCardData => ({
+    id: p.id || p.place_id || 'N/A',
     type,
     name: p.name || 'Provider',
     rating: p.rating || 0,
@@ -222,9 +323,14 @@ export function transformMatchData(backendResponse: any): MatchViewData {
   const inferredLoc = result.location || (topProvider && topProvider.location?.address) || 'Unknown';
   const inferredSvc = result.service_type || (topProvider && topProvider.name ? 'Matched Service' : 'Service');
 
+  // ── NEW: Compute nearby areas for no-match fallback ──
+  const hasProviders = !!(topProvider || alternativeCards.length > 0);
+  const nearbyAreas = !hasProviders ? getNearbyAreas(inferredLoc, 3) : undefined;
+  const noMatchReason = !hasProviders ? `No ${inferredSvc} providers available in ${inferredLoc} right now` : undefined;
+
   return {
-    status: 'success',
-    stage: 'booking_ready',
+    status: hasProviders ? 'success' : 'no_matches',
+    stage: hasProviders ? 'booking_ready' : 'no_matches',
     location: inferredLoc,
     service_type: inferredSvc,
     header: {
@@ -237,5 +343,7 @@ export function transformMatchData(backendResponse: any): MatchViewData {
     pricing_card: pricingCard,
     top_provider_card: topProvider,
     alternative_cards: alternativeCards.sort((a, b) => b.computed_score - a.computed_score),
+    nearby_areas: nearbyAreas,
+    no_match_reason: noMatchReason,
   };
 }

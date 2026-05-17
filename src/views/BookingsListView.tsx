@@ -241,6 +241,12 @@ function CancelSheet({ booking, onClose, onSuccess }: { booking: SavedBooking; o
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState('');
 
+  const currentBookingId = (booking.status === 'rescheduled' && booking.rescheduled_to?.booking_id) || booking.booking_id;
+  const currentProviderName = (booking.status === 'rescheduled' && booking.rescheduled_to?.provider_name) || booking.provider_name;
+  const currentProviderId = (booking.status === 'rescheduled' && booking.rescheduled_to?.provider_id) || (booking.provider_id || booking.provider_name.toLowerCase().replace(/\s+/g, '_'));
+  const currentSlot = (booking.status === 'rescheduled' && booking.rescheduled_to?.slot) || booking.slot;
+  const currentDate = (booking.status === 'rescheduled' && booking.rescheduled_to?.date) || booking.booking_date;
+
   // Option A: Cancel Only — no replacement, just mark cancelled
   const handleCancelOnly = async () => {
     setLoading('cancel'); setError('');
@@ -250,14 +256,14 @@ function CancelSheet({ booking, onClose, onSuccess }: { booking: SavedBooking; o
         body: JSON.stringify({
           endpoint: 'khadmat-reschedule',
           action: 'cancel_only',
-          booking_id: booking.booking_id,
-          provider_id: booking.provider_id || booking.provider_name.toLowerCase().replace(/\s+/g, '_'),
-          provider_name: booking.provider_name,
+          booking_id: currentBookingId,
+          provider_id: currentProviderId,
+          provider_name: currentProviderName,
           service_type: booking.service_type,
           location: booking.location,
-          booking_date: booking.booking_date,
+          booking_date: currentDate,
           price_pkr: booking.price_pkr,
-          slot: booking.slot,
+          slot: currentSlot,
           user_email: booking.user_email || getUserProfile()?.email || '',
         }),
       });
@@ -276,14 +282,14 @@ function CancelSheet({ booking, onClose, onSuccess }: { booking: SavedBooking; o
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           endpoint: 'khadmat-reschedule',
-          booking_id: booking.booking_id,
-          provider_id: booking.provider_id || booking.provider_name.toLowerCase().replace(/\s+/g, '_'),
-          provider_name: booking.provider_name,
+          booking_id: currentBookingId,
+          provider_id: currentProviderId,
+          provider_name: currentProviderName,
           service_type: booking.service_type,
           location: booking.location,
-          booking_date: booking.booking_date,
+          booking_date: currentDate,
           price_pkr: booking.price_pkr,
-          slot: booking.slot,
+          slot: currentSlot,
           alternatives: booking.alternatives || [],
           user_email: booking.user_email || getUserProfile()?.email || '',
         }),
@@ -340,9 +346,9 @@ function CancelSheet({ booking, onClose, onSuccess }: { booking: SavedBooking; o
 
             {/* Booking summary */}
             <div className="bg-surface-container-low rounded-2xl p-4 space-y-2 border border-outline-variant/20">
-              <div className="flex justify-between text-xs"><span className="text-outline font-medium">Provider</span><span className="font-bold text-on-surface">{booking.provider_name}</span></div>
+              <div className="flex justify-between text-xs"><span className="text-outline font-medium">Provider</span><span className="font-bold text-on-surface">{currentProviderName}</span></div>
               <div className="flex justify-between text-xs"><span className="text-outline font-medium">Service</span><span className="font-bold text-on-surface capitalize">{booking.service_type}</span></div>
-              <div className="flex justify-between text-xs"><span className="text-outline font-medium">Date & Time</span><span className="font-bold text-on-surface">{booking.booking_date} · {formatSlotLabel(booking.slot)}</span></div>
+              <div className="flex justify-between text-xs"><span className="text-outline font-medium">Date & Time</span><span className="font-bold text-on-surface">{currentDate} · {formatSlotLabel(currentSlot)}</span></div>
             </div>
 
             {error && <p className="text-xs text-error font-bold text-center">{error}</p>}
@@ -655,7 +661,7 @@ function BookingCard({ booking, onExpand, expanded, onRefresh, onTrack }: {
                   <button onClick={() => setShowDispute(true)} className="flex-1 py-3.5 border-2 border-outline-variant/30 text-on-surface-variant rounded-2xl font-black text-xs hover:bg-surface-variant active:scale-95 transition-all flex items-center justify-center gap-2">
                     <Flag className="w-4 h-4" />Report Issue
                   </button>
-                  {(booking.status === 'confirmed' || booking.status === 'pending') && (
+                  {(booking.status === 'confirmed' || booking.status === 'pending' || booking.status === 'rescheduled') && (
                     <button onClick={() => setShowCancel(true)} className="flex-1 py-3.5 border-2 border-error/20 text-error rounded-2xl font-black text-xs hover:bg-error/5 active:scale-95 transition-all flex items-center justify-center gap-2">
                       <XCircle className="w-4 h-4" />Cancel
                     </button>
