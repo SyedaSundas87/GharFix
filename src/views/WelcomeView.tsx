@@ -74,17 +74,22 @@ export function WelcomeView({ onGetStarted }: { onGetStarted: () => void }) {
         >
           <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100">
             {/* Carousel Image */}
-            <div className="w-full h-56 bg-gray-200 relative overflow-hidden">
+            <div className="w-full h-56 bg-gradient-to-br from-blue-50 to-indigo-50 relative overflow-hidden flex items-center justify-center p-4">
               <AnimatePresence mode="wait">
                 <motion.img
                   key={slide.id}
                   src={slide.image}
                   alt={slide.title}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="w-full h-full object-cover"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.4 }}
+                  className={`rounded-2xl shadow-md border border-white/50 ${
+                    slide.image === '/cleaner.jpeg'
+                      ? 'w-full max-w-[280px] h-auto object-contain max-h-[140px]'
+                      : 'w-full h-full object-cover'
+                  }`}
+                  style={{ imageRendering: 'auto' }}
                 />
               </AnimatePresence>
             </div>
