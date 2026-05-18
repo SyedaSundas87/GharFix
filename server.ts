@@ -4,7 +4,7 @@ import { createServer as createViteServer } from "vite";
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ limit: '50mb', extended: true }));
@@ -30,7 +30,7 @@ async function startServer() {
       const text = await response.text();
       res.status(response.status).send(text);
     } catch (error: any) {
-      console.error(`[Proxy] Critical Error: ${error.message}`);
+      console.error(`[Proxy] Critical Error: ${error.message} - stack: ${error.stack}`);
       res.status(500).json({ error: "Failed to forward request", details: error.message });
     }
   });

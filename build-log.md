@@ -98,5 +98,11 @@
   - Cleaned up obsolete code by removing the unused `OnboardingView.tsx` (now entirely handled by the unified `ProviderLoginView`).
 - **Timestamp:** 2026-05-18T22:30:00Z
 
+## Step 13: Cloud Run Deployment
+- **Action:** Fixed the `PORT` binding in `server.ts` to respect `process.env.PORT` instead of hardcoding `3000`.
+- **Action:** Deployed the application to Google Cloud Run in project `khidmatgar-ai-496721` (Region: `asia-south1`).
+- **URL:** [https://khidmatgar-cjq6e42ila-el.a.run.app](https://khidmatgar-cjq6e42ila-el.a.run.app)
+- **Timestamp:** 2026-05-18T23:15:00Z
+
 ## Final Status
-- **Status:** SUCCESS (AI Architecture Documented & UI Finalized)
+- **Status:** SUCCESS (Deployed Live on Google Cloud Run)

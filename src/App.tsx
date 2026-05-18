@@ -3,7 +3,7 @@ import { Home as HomeIcon, Search, Calendar, MessageSquare, User, LayoutDashboar
 import { HomeView } from './views/HomeView';
 import { MatchView } from './views/MatchView';
 import { DashView } from './views/DashView';
-import { OnboardingView } from './views/OnboardingView';
+
 import { WelcomeView } from './views/WelcomeView';
 import { BookingView } from './views/BookingView';
 import { BookingsListView } from './views/BookingsListView';
@@ -13,7 +13,7 @@ import { ProviderDashView } from './views/ProviderDashView';
 import { getUserProfile, hasUserProfile, clearUserProfile } from './lib/profile';
 import type { BookingPayload } from './views/BookingView';
 
-export type ViewState = 'welcome' | 'login' | 'onboarding' | 'home' | 'search' | 'booking' | 'bookings' | 'profile' | 'tracking' | 'provider_dash';
+export type ViewState = 'welcome' | 'login' | 'home' | 'search' | 'booking' | 'bookings' | 'profile' | 'tracking' | 'provider_dash';
 export type AppLanguage = 'english' | 'urdu' | 'roman_urdu';
 
 // Navigation history stack for proper back navigation
@@ -134,7 +134,6 @@ export default function App() {
   const viewTitles: Record<ViewState, string> = {
     welcome: 'KhidmatGaar',
     login: 'KhidmatGaar',
-    onboarding: 'KhidmatGaar',
     home: userProfile?.name ? `Asalam-o-Alaikum, ${userProfile.name.split(' ')[0]}` : 'Asalam-o-Alaikum',
     search: 'Provider Matches',
     booking: 'Confirm Booking',
@@ -174,7 +173,7 @@ export default function App() {
             >
               <ArrowLeft className="w-5 h-5" strokeWidth={2.5} />
             </button>
-          ) : currentView !== 'onboarding' && currentView !== 'login' && currentView !== 'welcome' ? (
+          ) : currentView !== 'login' && currentView !== 'welcome' ? (
             <div className="relative">
               <div className="w-10 h-10 rounded-full border-2 border-primary-container bg-primary flex items-center justify-center">
                 <span className="text-sm font-bold text-on-primary">
@@ -200,7 +199,7 @@ export default function App() {
           )}
 
           {/* Title block */}
-          {currentView !== 'onboarding' && currentView !== 'login' && currentView !== 'welcome' && (
+          {currentView !== 'login' && currentView !== 'welcome' && (
             <div>
               <h1 className="text-base font-bold text-primary leading-tight">
                 {viewTitles[currentView]}
@@ -209,7 +208,8 @@ export default function App() {
                 <p className="text-[10px] text-on-surface-variant font-medium leading-tight">
                   {viewSubtitles[currentView]}
                 </p>
-              </div>
+              )}
+            </div>
           )}
         </div>
 
@@ -265,12 +265,6 @@ export default function App() {
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full border border-white" />
             </button>
           )}
-
-          {currentView === 'onboarding' && (
-            <button onClick={() => setCurrentView('home')} className="text-xs font-semibold text-primary glass-card px-4 py-2 rounded-full drop-shadow-sm">
-              Skip
-            </button>
-          )}
         </div>
       </div>
     );
@@ -324,7 +318,7 @@ export default function App() {
     );
   };
 
-  const showBottomNav = !['onboarding', 'booking', 'tracking', 'login', 'welcome'].includes(currentView);
+  const showBottomNav = !['booking', 'tracking', 'login', 'welcome'].includes(currentView);
   
   // RTL support: apply direction to main container
   const mainDir = appLanguage === 'urdu' ? 'rtl' : 'ltr';
@@ -339,10 +333,10 @@ export default function App() {
         <TopBar />
       </header>
 
-      <main className={`w-full h-full min-h-screen overflow-y-auto ${currentView === 'onboarding' || currentView === 'login' || currentView === 'welcome' ? '' : 'pt-20 pb-28 md:pb-24'} px-4`}>
+      <main className={`w-full h-full min-h-screen overflow-y-auto ${currentView === 'login' || currentView === 'welcome' ? '' : 'pt-20 pb-28 md:pb-24'} px-4`}>
         {currentView === 'welcome' && <WelcomeView onGetStarted={handleWelcomeGetStarted} />}
         {currentView === 'login' && <ProviderLoginView onLoginSuccess={handleLoginSuccess} />}
-        {currentView === 'onboarding' && <OnboardingView onComplete={handleLoginSuccess} />}
+
 
         {currentView === 'home' && (
           <HomeView appLanguage={appLanguage} onServiceTriggered={handleServiceTriggered} />
