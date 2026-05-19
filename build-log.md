@@ -58,7 +58,7 @@
 ## Step 7: Open Preview in Browser
 - **Action:** Open app in browser (navigated to localhost:3000 as indicated by the server output).
 - **Status:** Captured a screenshot of the running app successfully.
-  ![App Screenshot](file:///C:/Users/Hp/.gemini/antigravity/brain/fbf77966-97c1-4463-b6bc-cef42131ac04/khidmatgaar_login_page_1778970289032.png)
+  ![App Screenshot](file:///C:/Users/Hp/.gemini/antigravity/brain/fbf77966-97c1-4463-b6bc-cef42131ac04/gharfix_login_page_1778970289032.png)
 - **Timestamp:** 2026-05-16T22:24:02Z
 
 ## Step 8: Convert to PWA
@@ -87,21 +87,21 @@
 - **Timestamp:** 2026-05-18T15:00:00Z
 
 ## Step 11: GitHub Integration (MCP)
-- **Action:** Connected via GitHub MCP and pushed all local modifications directly to the remote repository (`SyedaSundas87/khidmatgar`).
+- **Action:** Connected via GitHub MCP and pushed all local modifications directly to the remote repository (`SyedaSundas87/gharfix`).
   - Pushed `README.md`, `WelcomeView.tsx`, and `HomeView.tsx` to the `main` branch.
 - **Status:** Configured for real-time pushing on future edits.
 - **Timestamp:** 2026-05-18T15:28:00Z
 
 ## Step 12: AI System Integration & Architecture
-- **Action:** Extracted the core rules, schemas, and persona of the KhidmatGaar backend AI agent.
+- **Action:** Extracted the core rules, schemas, and persona of the GharFix backend AI agent.
   - Documented everything in `AI-System-Prompt.md` for hackathon reference.
   - Cleaned up obsolete code by removing the unused `OnboardingView.tsx` (now entirely handled by the unified `ProviderLoginView`).
 - **Timestamp:** 2026-05-18T22:30:00Z
 
 ## Step 13: Cloud Run Deployment
 - **Action:** Fixed the `PORT` binding in `server.ts` to respect `process.env.PORT` instead of hardcoding `3000`.
-- **Action:** Deployed the application to Google Cloud Run in project `khidmatgar-ai-496721` (Region: `asia-south1`).
-- **URL:** [https://khidmatgar-cjq6e42ila-el.a.run.app](https://khidmatgar-cjq6e42ila-el.a.run.app)
+- **Action:** Deployed the application to Google Cloud Run in project `gharfix-ai-496721` (Region: `asia-south1`).
+- **URL:** [https://gharfix-cjq6e42ila-el.a.run.app](https://gharfix-cjq6e42ila-el.a.run.app)
 - **Timestamp:** 2026-05-18T23:15:00Z
 
 ## Step 14: Generate Debug APK
@@ -109,13 +109,13 @@
 - **Action:** Synced Capacitor assets using `npx cap sync android`.
 - **Action:** Configured temporary `JAVA_HOME` pointing to JDK 21 (`C:\Program Files\Eclipse Adoptium\jdk-21.0.11.10-hotspot`) and executed `.\gradlew.bat assembleDebug --no-daemon` to bypass environment caching.
 - **Output:** Built debug APK at `android/app/build/outputs/apk/debug/app-debug.apk` (Size: 4.3 MB).
-- **GitHub Sync:** Pushed the compiled `app-debug.apk` directly to the root of the repository (`SyedaSundas87/khidmatgar`) on the `main` branch.
+- **GitHub Sync:** Pushed the compiled `app-debug.apk` directly to the root of the repository (`SyedaSundas87/gharfix`) on the `main` branch.
 - **Timestamp:** 2026-05-20T01:37:00Z
 
 ## Step 15: Resolve Android Launch Crash (Package Name Mismatch)
-- **Problem:** The app crashed immediately after installation because of a mismatch between the configured `applicationId` / `namespace` (`com.gharfix.app`) and the Java package folder structure/MainActivity declaration (`com.khidmatgar.app`). This caused a `ClassNotFoundException` when Android tried to boot `com.gharfix.app.MainActivity`.
+- **Problem:** The app crashed immediately after installation because of a mismatch between the configured `applicationId` / `namespace` (`com.gharfix.app`) and the Java package folder structure/MainActivity declaration (`com.gharfix.app`). This caused a `ClassNotFoundException` when Android tried to boot `com.gharfix.app.MainActivity`.
 - **Action:**
-  - Deleted the mismatched `android/app/src/main/java/com/khidmatgar` directory.
+  - Deleted the mismatched `android/app/src/main/java/com/gharfix` directory.
   - Created the correct path `android/app/src/main/java/com/gharfix/app/MainActivity.java` with the package declaration `package com.gharfix.app;`.
   - Rebuilt the web app (`npm run build`), synchronized Capacitor assets (`npx cap sync android`), and compiled a new, clean debug APK (`.\gradlew.bat assembleDebug --no-daemon`).
 - **Output:** New functioning debug APK built at `android/app/build/outputs/apk/debug/app-debug.apk` and copied to the root.
