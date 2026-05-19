@@ -87,7 +87,7 @@
 - **Timestamp:** 2026-05-18T15:00:00Z
 
 ## Step 11: GitHub Integration (MCP)
-- **Action:** Connected via GitHub MCP and pushed all local modifications directly to the remote repository (`SyedaSundas87/gharfix`).
+- **Action:** Connected via GitHub MCP and pushed all local modifications directly to the remote repository (`SyedaSundas87/GharFix`).
   - Pushed `README.md`, `WelcomeView.tsx`, and `HomeView.tsx` to the `main` branch.
 - **Status:** Configured for real-time pushing on future edits.
 - **Timestamp:** 2026-05-18T15:28:00Z
@@ -109,7 +109,7 @@
 - **Action:** Synced Capacitor assets using `npx cap sync android`.
 - **Action:** Configured temporary `JAVA_HOME` pointing to JDK 21 (`C:\Program Files\Eclipse Adoptium\jdk-21.0.11.10-hotspot`) and executed `.\gradlew.bat assembleDebug --no-daemon` to bypass environment caching.
 - **Output:** Built debug APK at `android/app/build/outputs/apk/debug/app-debug.apk` (Size: 4.3 MB).
-- **GitHub Sync:** Pushed the compiled `app-debug.apk` directly to the root of the repository (`SyedaSundas87/gharfix`) on the `main` branch.
+- **GitHub Sync:** Pushed the compiled `app-debug.apk` directly to the root of the repository (`SyedaSundas87/GharFix`) on the `main` branch.
 - **Timestamp:** 2026-05-20T01:37:00Z
 
 ## Step 15: Resolve Android Launch Crash (Package Name Mismatch)
